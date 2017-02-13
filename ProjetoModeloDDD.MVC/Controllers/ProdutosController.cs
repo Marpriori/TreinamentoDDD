@@ -37,6 +37,7 @@ namespace ProjetoModeloDDD.MVC.Controllers
         // GET: Produtos/Create
         public ActionResult Create()
         {
+            ViewBag.ClienteId = new SelectList(_clienteApp.GetAll(), "ClienteId", "Nome");
             return View();
         }
 
@@ -45,12 +46,15 @@ namespace ProjetoModeloDDD.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create(ProdutoViewModel produto)
         {
-            if (!ModelState.IsValid) return View(produto);
+            if (ModelState.IsValid)
+            {
+                var produtoDomain = Mapper.Map<ProdutoViewModel, Produto>(produto);
+                _produtoApp.Add(produtoDomain);
 
-            var produtoDomain = Mapper.Map<ProdutoViewModel, Produto>(produto);
-            _produtoApp.Add(produtoDomain);
-
-            return RedirectToAction("Index");
+                return RedirectToAction("Index");
+            }
+            ViewBag.ClienteId = new SelectList(_clienteApp.GetAll(), "ClienteId", "Nome", produto.ClienteId);
+            return View(produto);
         }
 
         // GET: Produtos/Edit/5
@@ -58,6 +62,8 @@ namespace ProjetoModeloDDD.MVC.Controllers
         {
             var produto = _produtoApp.GetById(id);
             var produtoViewModel = Mapper.Map<Produto, ProdutoViewModel>(produto);
+
+            ViewBag.ClienteId = new SelectList(_clienteApp.GetAll(), "ClienteId", "Nome", produtoViewModel.ClienteId);
 
             return View(produtoViewModel);
         }
@@ -67,12 +73,16 @@ namespace ProjetoModeloDDD.MVC.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(ProdutoViewModel produto)
         {
-            if (!ModelState.IsValid) return View(produto);
+            if (ModelState.IsValid)
+            {
+                var produtoDomain = Mapper.Map<ProdutoViewModel, Produto>(produto);
+                _produtoApp.Update(produtoDomain);
 
-            var produtoDomain = Mapper.Map<ProdutoViewModel, Produto>(produto);
-            _produtoApp.Update(produtoDomain);
+                return RedirectToAction("Index");
+            }
 
-            return RedirectToAction("Index");
+            ViewBag.ClienteId = new SelectList(_clienteApp.GetAll(), "ClienteId", "Nome", produto.ClienteId);
+            return View(produto);
         }
 
         // GET: Produtos/Delete/5
